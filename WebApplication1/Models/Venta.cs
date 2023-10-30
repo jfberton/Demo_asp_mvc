@@ -5,6 +5,8 @@
         public int Id { get; set; }
         public DateTime Fecha_hora { get; set; }
         public decimal Total { get; set; }
+
+        public List<Detalle_venta> Detalle { get; set; }
     }
 
 }

@@ -8,7 +8,6 @@
         public decimal Total_linea { get; set; }
 
         public int VentaId { get; set; }
-        public Venta Venta { get; set; }
 
     }
 }
