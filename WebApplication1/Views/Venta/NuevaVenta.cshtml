@@ -1,0 +1,161 @@
+﻿@model Venta
+
+@{
+    ViewData["Title"] = "Nueva Venta";
+}
+
+<h2>Nueva Venta</h2>
+
+<form asp-action="NuevaVenta" method="post">
+    <div class="form-group">
+        @Html.LabelFor(model => model.Cliente, new { @class = "control-label" })
+        @Html.TextBoxFor(model => model.Cliente, new { @class = "form-control" })
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+            <table>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td><select asp-items="ViewBag.Productos" class="form-control producto" id="select_producto" itemid="select_producto"></select></td>
+                    <td><input type="text" id="tb_precio_producto" name="tb_precio_producto" class="form-control" readonly /></td>
+                    <td><input type="number" id="tb_cantidad" name="tb_cantidad" class="form-control" /></td>
+                    <td><input type="button" onclick="agregar_detalle(); return false;" value="Agregar" /></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="div_detalle">
+        <table id="tabla_detalle">
+            <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+                <th>Subtotal</th>
+            </tr>
+        </table>
+    </div>
+
+
+
+    <button type="submit" class="btn btn-primary">Iniciar Nueva Venta</button>
+</form>
+
+@section Scripts{
+    <script>
+
+
+        $(document).ready(function () {
+            //obtengo el precio del primer producto que se muestra en el select
+            var id_producto_seleccionado = $('#select_producto').val();
+            obtener_precio_producto(id_producto_seleccionado);
+
+            //cada vez que cambia el producto seleccionado, obtengo el precio del producto seleccionado
+            $('#select_producto').change(function () {
+                var id_producto_seleccionado = $(this).val();
+                obtener_precio_producto(id_producto_seleccionado);
+            });
+        });
+
+        function obtener_precio_producto(id_producto) {
+            $.ajax({
+                url: '/Productos/ObtenerPrecio',
+                type: "GET",
+                data: { id: id_producto },
+                success: function (data) {
+                    document.getElementById('tb_precio_producto').value = data.precio;
+                },
+                error: function (xhr, status, error) {
+                    document.getElementById('tb_precio_producto').value = xhr.responseText;
+                }
+            });
+        }
+
+        //defino variable global para manejar el index de los detalles
+        var index = 0;
+
+        function agregar_detalle() {
+            console.log("Agrego detalle con index: " + index);
+            var id_producto = document.getElementById('select_producto').value;
+            var producto = document.querySelector("#select_producto").options[document.querySelector("#select_producto").selectedIndex].text;
+            var precio = document.getElementById('tb_precio_producto').value;
+            var cantidad = document.getElementById('tb_cantidad').value;
+
+
+
+            //obtengo la tabla detalle y agrego una nueva fila
+            var tabla = document.getElementById('tabla_detalle');
+
+            //creo el tr
+            var tr = document.createElement('tr');
+
+            //creo los td
+            var td_producto = document.createElement('td');
+            td_producto.innerHTML = producto;
+            var td_precio = document.createElement('td');
+            td_precio.innerHTML = precio;
+            var td_cantidad = document.createElement('td');
+            td_cantidad.innerHTML = cantidad;
+            var td_subtotal = document.createElement('td');
+            td_subtotal.innerHTML = parseFloat(precio) * parseFloat(cantidad);
+
+            //agrego los td al tr
+            tr.appendChild(td_producto);
+            tr.appendChild(td_precio);
+            tr.appendChild(td_cantidad);
+            tr.appendChild(td_subtotal);
+
+            //agrego el tr a la tabla
+            tabla.appendChild(tr);
+
+            //agregamos los valores al hidden
+            var div_detalle = document.getElementById('div_detalle');
+            var hidden_detalle_index = document.createElement('input');
+            var hidden_detalle_producto_id = document.createElement('input');
+            var hidden_detalle_cantidad = document.createElement('input');
+            var hidden_detalle_subtotal = document.createElement('input');
+
+            hidden_detalle_index.setAttribute('type', 'hidden');
+            hidden_detalle_index.setAttribute('name', 'Detalle.Index');
+            hidden_detalle_index.setAttribute('id', 'Detalle.Index');
+            console.log("Agrego index: " + index);
+            hidden_detalle_index.setAttribute('value', index);
+
+            hidden_detalle_producto_id.setAttribute('type', 'hidden');
+            hidden_detalle_producto_id.setAttribute('name', 'Detalle[' + index + '].ProductoId');
+            hidden_detalle_producto_id.setAttribute('id', 'Detalle[' + index + '].ProductoId');
+            console.log("Agrego id producto: " + id_producto);
+            hidden_detalle_producto_id.setAttribute('value', id_producto);
+
+            hidden_detalle_cantidad.setAttribute('type', 'hidden');
+            hidden_detalle_cantidad.setAttribute('name', 'Detalle[' + index + '].Cantidad');
+            hidden_detalle_cantidad.setAttribute('id', 'Detalle[' + index + '].Cantidad');
+            console.log("Agrego cantidad: " + cantidad);
+            hidden_detalle_cantidad.setAttribute('value', cantidad);
+
+           
+            hidden_detalle_subtotal.setAttribute('type', 'hidden');
+            hidden_detalle_subtotal.setAttribute('name', 'Detalle[' + index + '].Total_linea');
+            hidden_detalle_subtotal.setAttribute('id', 'Detalle[' + index + '].Total_linea');
+            console.log("Agrego subtotal: " + parseFloat(precio) * parseFloat(cantidad));
+            hidden_detalle_subtotal.setAttribute('value', parseFloat(precio) * parseFloat(cantidad));
+
+            div_detalle.appendChild(hidden_detalle_index);
+            div_detalle.appendChild(hidden_detalle_producto_id);
+            div_detalle.appendChild(hidden_detalle_cantidad);
+            div_detalle.appendChild(hidden_detalle_subtotal);
+
+            //incrementamos el index
+            index++;
+
+            //limpio el campo cantidad, el resto es readonly
+            document.getElementById('tb_cantidad').value = 0;
+        }
+    </script>
+
+}

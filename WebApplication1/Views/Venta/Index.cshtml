@@ -1,0 +1,37 @@
+﻿@model List<Venta>
+
+@{
+    ViewData["Title"] = "Listado de Ventas";
+}
+
+<h2>Listado de Ventas</h2>
+<a asp-action="NuevaVenta">Nueva venta</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Fecha y Hora</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var venta in Model)
+        {
+            <tr>
+                <td>@venta.Id</td>
+                <td>@venta.Fecha_hora</td>
+                <td>@venta.Cliente</td>
+                <td>@venta.Total.ToString("C")</td>
+                <td>
+                    <a asp-action="VerDetalle" asp-route-id="@venta.Id">Ver Detalle</a> |
+                    <form asp-action="EliminarVenta" asp-route-id="@venta.Id" method="post">
+                        <button type="submit" class="btn-link">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
